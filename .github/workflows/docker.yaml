@@ -38,4 +38,4 @@ jobs:
     - name: Push Docker image to GitHub Packages
       run: |
         REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-        docker push ghcr.io/$REPO_OWNER/sidejitserver:latest
+        docker push ghcr.io/$OWNER_LC/sidejitserver:latest
