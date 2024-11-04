@@ -35,9 +35,7 @@ jobs:
       env:
         OWNER: '${{ github.repository_owner }}'
         
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: ghcr.io/${{ env.OWNER_LG }}/sidejitserver:latest
+    - name: Push Docker image to GitHub Packages
+        run: |
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker push ghcr.io/$REPO_OWNER/sidejitserver:latest
