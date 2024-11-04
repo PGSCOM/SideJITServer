@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Docker
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-
 permissions:
   contents: read
   packages: write
@@ -17,25 +16,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: set lower case owner name
-      run: |
-        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-      env:
-        OWNER: '${{ github.repository_owner }}'
-        
-    - name: Push Docker image to GitHub Packages
-      run: |
-        REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-        docker push ghcr.io/$OWNER_LC/sidejitserver:latest
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Docker image
+        run: docker build -t sidejitserver  .
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag Docker image
+        run: |
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker tag sidejitserver ghcr.io/$REPO_OWNER/vdo-ninja:latest
+
+      - name: Push Docker image to GitHub Packages
+        run: |
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker push ghcr.io/$REPO_OWNER/sidejitserver:latest
